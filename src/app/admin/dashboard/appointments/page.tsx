@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { getAppointments, updateAppointmentStatus, deleteAppointment, AppointmentData } from '@/lib/firestore';
 import { Button } from '@/components/ui';
-import { Calendar, Clock, User, Phone, Mail, Trash2, CheckCircle, XCircle, Loader2, AlertCircle } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { Calendar, Clock, User, Phone, Mail, Trash2, Loader2, AlertCircle } from 'lucide-react';
 
 const statusColors = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -18,6 +19,9 @@ export default function AppointmentsPage() {
     const [appointments, setAppointments] = useState<AppointmentData[]>([]);
     const [loading, setLoading] = useState(true);
     const [updating, setUpdating] = useState<string | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         loadAppointments();
@@ -41,13 +45,21 @@ export default function AppointmentsPage() {
         setUpdating(null);
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this appointment?')) return;
+    const openDeleteDialog = (id: string) => {
+        setDeletingId(id);
+        setDeleteDialogOpen(true);
+    };
 
-        const success = await deleteAppointment(id);
+    const handleDelete = async () => {
+        if (!deletingId) return;
+        setDeleting(true);
+        const success = await deleteAppointment(deletingId);
         if (success) {
-            setAppointments(prev => prev.filter(apt => apt.id !== id));
+            setAppointments(prev => prev.filter(apt => apt.id !== deletingId));
         }
+        setDeleting(false);
+        setDeleteDialogOpen(false);
+        setDeletingId(null);
     };
 
     if (loading) {
@@ -177,7 +189,7 @@ export default function AppointmentsPage() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <button
-                                                onClick={() => handleDelete(appointment.id!)}
+                                                onClick={() => openDeleteDialog(appointment.id!)}
                                                 className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                 title="Delete"
                                             >
@@ -191,6 +203,21 @@ export default function AppointmentsPage() {
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={deleteDialogOpen}
+                onClose={() => {
+                    setDeleteDialogOpen(false);
+                    setDeletingId(null);
+                }}
+                onConfirm={handleDelete}
+                title="Delete Appointment"
+                message="Are you sure you want to delete this appointment? This action cannot be undone."
+                confirmText="Delete"
+                isLoading={deleting}
+                variant="danger"
+            />
         </div>
     );
 }

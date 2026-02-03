@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { getAdminUsers, addAdminUser, updateAdminUser, deleteAdminUser, AdminUserData } from '@/lib/firestore';
 import { useAdminAuth } from '@/lib/AdminAuthContext';
 import { Button } from '@/components/ui';
-import { Users, Plus, Pencil, Trash2, Loader2, AlertCircle, X, Eye, EyeOff, Shield } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { Users, Plus, Pencil, Trash2, Loader2, AlertCircle, X, Eye, EyeOff } from 'lucide-react';
 
 const ALL_PAGES = [
     { id: 'dashboard', label: 'Dashboard' },
@@ -49,6 +50,12 @@ export default function UsersPage() {
     const [saving, setSaving] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Delete dialog state
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+    const [deletingUserName, setDeletingUserName] = useState<string>('');
+    const [deleting, setDeleting] = useState(false);
 
     useEffect(() => {
         loadUsers();
@@ -134,10 +141,21 @@ export default function UsersPage() {
         setSaving(false);
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this user?')) return;
-        await deleteAdminUser(id);
+    const openDeleteDialog = (user: AdminUserData) => {
+        setDeletingUserId(user.id!);
+        setDeletingUserName(user.name);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDelete = async () => {
+        if (!deletingUserId) return;
+        setDeleting(true);
+        await deleteAdminUser(deletingUserId);
         loadUsers();
+        setDeleting(false);
+        setDeleteDialogOpen(false);
+        setDeletingUserId(null);
+        setDeletingUserName('');
     };
 
     const togglePage = (pageId: string) => {
@@ -281,7 +299,7 @@ export default function UsersPage() {
                                                     <Pencil className="w-4 h-4" />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(user.id!)}
+                                                    onClick={() => openDeleteDialog(user)}
                                                     className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                                     title="Delete"
                                                 >
@@ -406,8 +424,8 @@ export default function UsersPage() {
                                         <label
                                             key={page.id}
                                             className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${formData.allowedPages.includes(page.id)
-                                                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
-                                                    : 'border-secondary-200 dark:border-secondary-600 hover:border-secondary-300'
+                                                ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
+                                                : 'border-secondary-200 dark:border-secondary-600 hover:border-secondary-300'
                                                 }`}
                                         >
                                             <input
@@ -444,6 +462,22 @@ export default function UsersPage() {
                     </div>
                 </div>
             )}
+
+            {/* Delete Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={deleteDialogOpen}
+                onClose={() => {
+                    setDeleteDialogOpen(false);
+                    setDeletingUserId(null);
+                    setDeletingUserName('');
+                }}
+                onConfirm={handleDelete}
+                title="Delete User"
+                message={`Are you sure you want to delete "${deletingUserName}"? This action cannot be undone and the user will no longer be able to access the admin panel.`}
+                confirmText="Delete"
+                isLoading={deleting}
+                variant="danger"
+            />
         </div>
     );
 }
