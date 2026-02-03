@@ -1,0 +1,9 @@
+export { Hero } from './Hero';
+export { AboutPreview } from './AboutPreview';
+export { ServicesPreview } from './ServicesPreview';
+export { WhyChooseUs } from './WhyChooseUs';
+export { WhyUs } from './WhyUs';
+export { Approach } from './Approach';
+export { Testimonials } from './Testimonials';
+export { BlogPreview } from './BlogPreview';
+export { CTABanner } from './CTABanner';
