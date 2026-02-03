@@ -1,8 +1,7 @@
 import { Metadata } from 'next';
 import { SectionWrapper, Card } from '@/components/ui';
-import { ContactForm } from '@/components/ContactForm';
-import { BookingCalendar } from '@/components';
-import { Calendar, Clock, CheckCircle } from 'lucide-react';
+import { BookingCalendarWithForm } from '@/components';
+import { Clock, CheckCircle } from 'lucide-react';
 
 export const metadata: Metadata = {
     title: 'Book an Appointment',
@@ -15,8 +14,6 @@ const benefits = [
     'Flexible appointment times',
     'Experienced physiotherapists',
     'State-of-the-art facilities',
-    'Convenient location',
-    'Same-day appointments available',
 ];
 
 export default function BookPage() {
@@ -48,28 +45,15 @@ export default function BookPage() {
                         <div className="p-8 border-b border-secondary-100 text-center">
                             <h2 className="text-2xl font-bold">Request an Appointment</h2>
                             <p className="text-secondary-600">
-                                Fill in the details below to request your appointment.
+                                Select a date and time, then fill in your details.
                             </p>
                         </div>
 
-                        <div className="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-secondary-100">
-                            {/* Left Column: Calendar */}
-                            <div className="p-8">
-                                <h3 className="text-xl font-bold mb-6 text-secondary-900">1. Select Date & Time</h3>
-                                <BookingCalendar />
-                            </div>
-
-                            {/* Right Column: Form */}
-                            <div className="p-8 bg-white">
-                                <h3 className="text-xl font-bold mb-6 text-secondary-900">2. Your Details</h3>
-                                <ContactForm />
-                            </div>
-                        </div>
+                        <BookingCalendarWithForm />
                     </Card>
 
-                    {/* Additional Info / Features Grid below the main card */}
+                    {/* Additional Info */}
                     <div className="grid md:grid-cols-3 gap-6 mt-12">
-                        {/* Working Hours */}
                         <Card className="p-6" hover={false}>
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
@@ -93,7 +77,6 @@ export default function BookPage() {
                             </div>
                         </Card>
 
-                        {/* Patient Benefits */}
                         <Card className="p-6" hover={false}>
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
@@ -102,7 +85,7 @@ export default function BookPage() {
                                 <h3 className="text-lg">Patient Benefits</h3>
                             </div>
                             <ul className="space-y-3">
-                                {benefits.slice(0, 4).map((benefit, index) => (
+                                {benefits.map((benefit, index) => (
                                     <li key={index} className="flex items-start gap-2 text-sm">
                                         <CheckCircle className="w-4 h-4 text-primary-600 mt-0.5 flex-shrink-0" />
                                         <span className="text-secondary-600">{benefit}</span>
@@ -111,7 +94,6 @@ export default function BookPage() {
                             </ul>
                         </Card>
 
-                        {/* Contact */}
                         <div className="bg-primary-50 rounded-2xl p-6 border border-primary-100">
                             <h4 className="font-semibold text-primary-900 mb-2">Need Immediate Help?</h4>
                             <p className="text-sm text-primary-700 mb-4">

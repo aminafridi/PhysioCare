@@ -86,6 +86,30 @@ export interface SettingsData {
     updatedAt?: Date;
 }
 
+export interface AppointmentData {
+    id?: string;
+    name: string;
+    email: string;
+    phone: string;
+    service: string;
+    date: string;
+    time: string;
+    message?: string;
+    status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+    createdAt?: Date;
+}
+
+export interface AdminUserData {
+    id?: string;
+    email: string;
+    password: string;
+    name: string;
+    role: 'superadmin' | 'admin' | 'editor';
+    allowedPages: string[];
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
 // About Page
 export async function getAboutPage(): Promise<AboutPageData | null> {
     try {
@@ -318,6 +342,115 @@ export async function updateSettings(data: SettingsData): Promise<boolean> {
         return true;
     } catch (error) {
         console.error('Error updating settings:', error);
+        return false;
+    }
+}
+
+// Appointments
+export async function getAppointments(): Promise<AppointmentData[]> {
+    try {
+        const q = query(collection(db, 'appointments'), orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AppointmentData));
+    } catch (error) {
+        console.error('Error getting appointments:', error);
+        return [];
+    }
+}
+
+export async function addAppointment(data: Omit<AppointmentData, 'id'>): Promise<string | null> {
+    try {
+        const docRef = await addDoc(collection(db, 'appointments'), {
+            ...data,
+            status: 'pending',
+            createdAt: serverTimestamp()
+        });
+        return docRef.id;
+    } catch (error) {
+        console.error('Error adding appointment:', error);
+        return null;
+    }
+}
+
+export async function updateAppointmentStatus(id: string, status: AppointmentData['status']): Promise<boolean> {
+    try {
+        const docRef = doc(db, 'appointments', id);
+        await updateDoc(docRef, { status });
+        return true;
+    } catch (error) {
+        console.error('Error updating appointment status:', error);
+        return false;
+    }
+}
+
+export async function deleteAppointment(id: string): Promise<boolean> {
+    try {
+        await deleteDoc(doc(db, 'appointments', id));
+        return true;
+    } catch (error) {
+        console.error('Error deleting appointment:', error);
+        return false;
+    }
+}
+
+// Admin Users
+export async function getAdminUsers(): Promise<AdminUserData[]> {
+    try {
+        const q = query(collection(db, 'adminUsers'), orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AdminUserData));
+    } catch (error) {
+        console.error('Error getting admin users:', error);
+        return [];
+    }
+}
+
+export async function getAdminUserByEmail(email: string): Promise<AdminUserData | null> {
+    try {
+        const q = query(collection(db, 'adminUsers'), where('email', '==', email));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const docSnap = querySnapshot.docs[0];
+            return { id: docSnap.id, ...docSnap.data() } as AdminUserData;
+        }
+        return null;
+    } catch (error) {
+        console.error('Error getting admin user by email:', error);
+        return null;
+    }
+}
+
+export async function addAdminUser(data: Omit<AdminUserData, 'id'>): Promise<string | null> {
+    try {
+        const docRef = await addDoc(collection(db, 'adminUsers'), {
+            ...data,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp()
+        });
+        return docRef.id;
+    } catch (error) {
+        console.error('Error adding admin user:', error);
+        return null;
+    }
+}
+
+export async function updateAdminUser(id: string, data: Partial<AdminUserData>): Promise<boolean> {
+    try {
+        const docRef = doc(db, 'adminUsers', id);
+        await updateDoc(docRef, { ...data, updatedAt: serverTimestamp() });
+        return true;
+    } catch (error) {
+        console.error('Error updating admin user:', error);
+        return false;
+    }
+}
+
+export async function deleteAdminUser(id: string): Promise<boolean> {
+    try {
+        await deleteDoc(doc(db, 'adminUsers', id));
+        return true;
+    } catch (error) {
+        console.error('Error deleting admin user:', error);
         return false;
     }
 }
