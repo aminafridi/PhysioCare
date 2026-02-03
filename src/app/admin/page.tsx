@@ -99,16 +99,7 @@ export default function AdminLoginPage() {
                         </Button>
                     </form>
 
-                    {/* Demo Credentials */}
-                    <div className="mt-6 p-4 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-                        <p className="text-sm text-primary-700 dark:text-primary-300 font-medium mb-2">
-                            Demo Credentials:
-                        </p>
-                        <p className="text-sm text-primary-600 dark:text-primary-400">
-                            Email: admin@physiocare.com<br />
-                            Password: admin123
-                        </p>
-                    </div>
+
                 </div>
             </div>
         </div>
