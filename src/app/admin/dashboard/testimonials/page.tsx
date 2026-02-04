@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button, Modal } from '@/components/ui';
-import { Plus, Star, Trash2, Save, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui';
+import { Plus, Star, Trash2, Save, CheckCircle, Loader2, AlertTriangle, X } from 'lucide-react';
 import {
     getTestimonials,
     addTestimonial,
@@ -11,6 +11,7 @@ import {
     TestimonialData
 } from '@/lib/firestore';
 import { testimonials as defaultTestimonials } from '@/data/testimonials';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 export default function TestimonialsManagementPage() {
     const [testimonials, setTestimonials] = useState<TestimonialData[]>([]);
@@ -109,23 +110,27 @@ export default function TestimonialsManagementPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-secondary-900 dark:text-white">
+                    <h1 className="text-xl sm:text-2xl font-bold text-secondary-900 dark:text-white">
                         Manage Testimonials
                     </h1>
-                    <p className="text-secondary-600 dark:text-secondary-400">
+                    <p className="text-sm sm:text-base text-secondary-600 dark:text-secondary-400">
                         Add and manage patient testimonials
                     </p>
                 </div>
-                <div className="flex gap-3">
-                    <Button variant="secondary" onClick={() => setShowAddForm(!showAddForm)} className="gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <Button
+                        variant="secondary"
+                        onClick={() => setShowAddForm(!showAddForm)}
+                        className="gap-2 min-h-[48px]"
+                    >
                         <Plus className="w-4 h-4" />
                         Add New
                     </Button>
-                    <Button onClick={handleSaveAll} className="gap-2" disabled={saving}>
+                    <Button onClick={handleSaveAll} className="gap-2 min-h-[48px]" disabled={saving}>
                         {saving ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                         ) : saved ? (
@@ -140,23 +145,31 @@ export default function TestimonialsManagementPage() {
 
             {/* Add New Form */}
             {showAddForm && (
-                <div className="bg-white dark:bg-secondary-800 rounded-xl p-6 shadow-sm border border-secondary-200 dark:border-secondary-700">
-                    <h3 className="font-semibold text-secondary-900 dark:text-white mb-4">
-                        Add New Testimonial
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="bg-white dark:bg-secondary-800 rounded-xl p-4 sm:p-6 shadow-sm border border-secondary-200 dark:border-secondary-700">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold text-secondary-900 dark:text-white">
+                            Add New Testimonial
+                        </h3>
+                        <button
+                            onClick={() => setShowAddForm(false)}
+                            className="p-2 text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center sm:hidden"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <input
                             type="text"
                             value={newTestimonial.name}
                             onChange={(e) => setNewTestimonial({ ...newTestimonial, name: e.target.value })}
-                            className="px-4 py-2.5 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white"
+                            className="px-4 py-3 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white min-h-[48px]"
                             placeholder="Patient Name"
                         />
                         <input
                             type="text"
                             value={newTestimonial.role}
                             onChange={(e) => setNewTestimonial({ ...newTestimonial, role: e.target.value })}
-                            className="px-4 py-2.5 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white"
+                            className="px-4 py-3 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white min-h-[48px]"
                             placeholder="Role (e.g., Business Owner, Athlete)"
                         />
                     </div>
@@ -164,89 +177,72 @@ export default function TestimonialsManagementPage() {
                         value={newTestimonial.content}
                         onChange={(e) => setNewTestimonial({ ...newTestimonial, content: e.target.value })}
                         rows={3}
-                        className="w-full px-4 py-2.5 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white mb-4 resize-none"
+                        className="w-full px-4 py-3 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white mb-4 resize-none"
                         placeholder="Testimonial content..."
                     />
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                         <div className="flex items-center gap-2">
                             <span className="text-sm text-secondary-600 dark:text-secondary-400">Rating:</span>
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    onClick={() => setNewTestimonial({ ...newTestimonial, rating: star })}
-                                    className="focus:outline-none"
-                                >
-                                    <Star
-                                        className={`w-5 h-5 ${star <= newTestimonial.rating
-                                            ? 'text-yellow-400 fill-yellow-400'
-                                            : 'text-secondary-300'
-                                            }`}
-                                    />
-                                </button>
-                            ))}
+                            <div className="flex gap-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        onClick={() => setNewTestimonial({ ...newTestimonial, rating: star })}
+                                        className="p-1 focus:outline-none min-w-[36px] min-h-[36px] flex items-center justify-center"
+                                    >
+                                        <Star
+                                            className={`w-6 h-6 ${star <= newTestimonial.rating
+                                                ? 'text-yellow-400 fill-yellow-400'
+                                                : 'text-secondary-300'
+                                                }`}
+                                        />
+                                    </button>
+                                ))}
+                            </div>
                         </div>
-                        <Button onClick={handleAddTestimonial}>Add Testimonial</Button>
+                        <Button onClick={handleAddTestimonial} className="w-full sm:w-auto min-h-[48px]">
+                            Add Testimonial
+                        </Button>
                     </div>
                 </div>
             )}
 
             {/* Testimonials List */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
                 {testimonials.map((testimonial) => (
                     <div
                         key={testimonial.id}
-                        className="bg-white dark:bg-secondary-800 rounded-xl p-6 shadow-sm border border-secondary-200 dark:border-secondary-700"
+                        className="bg-white dark:bg-secondary-800 rounded-xl p-4 sm:p-6 shadow-sm border border-secondary-200 dark:border-secondary-700"
                     >
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                                        <span className="font-bold text-primary-600 dark:text-primary-400">
-                                            {testimonial.name.charAt(0)}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <input
-                                            type="text"
-                                            value={testimonial.name}
-                                            onChange={(e) => testimonial.id && updateLocalTestimonial(testimonial.id, 'name', e.target.value)}
-                                            className="font-medium bg-transparent border-b border-transparent hover:border-secondary-300 focus:border-primary-500 text-secondary-900 dark:text-white focus:outline-none"
-                                        />
-                                        <input
-                                            type="text"
-                                            value={testimonial.role}
-                                            onChange={(e) => testimonial.id && updateLocalTestimonial(testimonial.id, 'role', e.target.value)}
-                                            className="block text-sm bg-transparent border-b border-transparent hover:border-secondary-300 focus:border-primary-500 text-secondary-500 focus:outline-none"
-                                        />
-                                    </div>
+                        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                            {/* Avatar and Info */}
+                            <div className="flex items-start gap-3 flex-1">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
+                                    <span className="font-bold text-primary-600 dark:text-primary-400 text-sm sm:text-base">
+                                        {testimonial.name.charAt(0)}
+                                    </span>
                                 </div>
-                                <div className="flex gap-1 mb-2">
-                                    {[1, 2, 3, 4, 5].map((star) => (
-                                        <button
-                                            key={star}
-                                            onClick={() => testimonial.id && updateLocalTestimonial(testimonial.id, 'rating', star)}
-                                            className="focus:outline-none"
-                                        >
-                                            <Star
-                                                className={`w-4 h-4 ${star <= testimonial.rating
-                                                    ? 'text-yellow-400 fill-yellow-400'
-                                                    : 'text-secondary-300'
-                                                    }`}
-                                            />
-                                        </button>
-                                    ))}
+                                <div className="flex-1 min-w-0">
+                                    <input
+                                        type="text"
+                                        value={testimonial.name}
+                                        onChange={(e) => testimonial.id && updateLocalTestimonial(testimonial.id, 'name', e.target.value)}
+                                        className="w-full font-medium bg-transparent border-b border-transparent hover:border-secondary-300 focus:border-primary-500 text-secondary-900 dark:text-white focus:outline-none py-1"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={testimonial.role}
+                                        onChange={(e) => testimonial.id && updateLocalTestimonial(testimonial.id, 'role', e.target.value)}
+                                        className="w-full text-sm bg-transparent border-b border-transparent hover:border-secondary-300 focus:border-primary-500 text-secondary-500 focus:outline-none py-1"
+                                    />
                                 </div>
-                                <textarea
-                                    value={testimonial.content}
-                                    onChange={(e) => testimonial.id && updateLocalTestimonial(testimonial.id, 'content', e.target.value)}
-                                    rows={2}
-                                    className="w-full bg-transparent border border-transparent hover:border-secondary-300 focus:border-primary-500 rounded-lg p-2 text-secondary-600 dark:text-secondary-300 focus:outline-none resize-none"
-                                />
                             </div>
+
+                            {/* Delete button - visible on mobile */}
                             <button
                                 onClick={() => testimonial.id && handleDeleteClick(testimonial.id)}
                                 disabled={deleting === testimonial.id}
-                                className="p-2 text-secondary-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
+                                className="p-2.5 text-secondary-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center self-end sm:self-start"
                             >
                                 {deleting === testimonial.id ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -255,40 +251,57 @@ export default function TestimonialsManagementPage() {
                                 )}
                             </button>
                         </div>
+
+                        {/* Rating */}
+                        <div className="flex gap-1 my-3">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    onClick={() => testimonial.id && updateLocalTestimonial(testimonial.id, 'rating', star)}
+                                    className="p-0.5 focus:outline-none"
+                                >
+                                    <Star
+                                        className={`w-5 h-5 ${star <= testimonial.rating
+                                            ? 'text-yellow-400 fill-yellow-400'
+                                            : 'text-secondary-300'
+                                            }`}
+                                    />
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Content */}
+                        <textarea
+                            value={testimonial.content}
+                            onChange={(e) => testimonial.id && updateLocalTestimonial(testimonial.id, 'content', e.target.value)}
+                            rows={2}
+                            className="w-full bg-transparent border border-transparent hover:border-secondary-300 focus:border-primary-500 rounded-lg p-2 text-secondary-600 dark:text-secondary-300 focus:outline-none resize-none text-sm sm:text-base"
+                        />
                     </div>
                 ))}
             </div>
 
-            <Modal
+            {/* Empty State */}
+            {testimonials.length === 0 && (
+                <div className="text-center py-12">
+                    <p className="text-secondary-600 dark:text-secondary-400 mb-4">
+                        No testimonials yet
+                    </p>
+                    <Button onClick={() => setShowAddForm(true)}>Add Your First Testimonial</Button>
+                </div>
+            )}
+
+            {/* Delete Confirmation Dialog */}
+            <ConfirmDialog
                 isOpen={deleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
                 title="Delete Testimonial"
-            >
-                <div className="flex flex-col gap-4">
-                    <div className="flex items-center gap-3 text-amber-500 bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
-                        <AlertTriangle className="w-6 h-6 flex-shrink-0" />
-                        <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                            This will permanently remove this testimonial.
-                        </p>
-                    </div>
-                    <p className="text-secondary-600 dark:text-secondary-400">
-                        Are you sure you want to proceed?
-                    </p>
-                    <div className="flex justify-end gap-3 mt-4">
-                        <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            className="bg-red-600 hover:bg-red-700 text-white border-none"
-                            onClick={confirmDelete}
-                            disabled={!!deleting}
-                        >
-                            {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
-                            Delete
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
+                message="This will permanently remove this testimonial. Are you sure you want to proceed?"
+                confirmText="Delete"
+                isLoading={!!deleting}
+                variant="danger"
+            />
         </div>
     );
 }

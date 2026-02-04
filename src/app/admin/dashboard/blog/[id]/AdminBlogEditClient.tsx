@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui';
-import { Save, ArrowLeft, CheckCircle, Loader2, Upload, AlertCircle, X } from 'lucide-react';
+import { Save, ArrowLeft, CheckCircle, Loader2, Upload, AlertCircle, X, Image as ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import { getBlogPost, updateBlogPost, BlogPostData } from '@/lib/firestore';
 import { blogPosts as defaultPosts } from '@/data/blog-posts';
@@ -55,7 +55,6 @@ export default function EditBlogPostClient() {
                     setPost(defaultPost);
                 } else {
                     alert('Blog post not found');
-                    // router.push('/admin/dashboard/blog'); // Commented out to prevent redirect loops or unexpected behavior during static build/client mismatch
                 }
             }
             setLoading(false);
@@ -129,25 +128,29 @@ export default function EditBlogPostClient() {
     }
 
     return (
-        <div className="max-w-4xl space-y-6">
+        <div className="max-w-4xl space-y-4 sm:space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3 sm:gap-4">
                     <Link href="/admin/dashboard/blog">
-                        <button className="p-2 text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded-lg transition-colors">
+                        <button className="p-2.5 text-secondary-500 hover:text-secondary-700 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
                             <ArrowLeft className="w-5 h-5" />
                         </button>
                     </Link>
                     <div>
-                        <h1 className="text-2xl font-bold text-secondary-900 dark:text-white">
+                        <h1 className="text-xl sm:text-2xl font-bold text-secondary-900 dark:text-white">
                             Edit Blog Post
                         </h1>
-                        <p className="text-secondary-600 dark:text-secondary-400">
+                        <p className="text-sm text-secondary-600 dark:text-secondary-400">
                             Edit your health article
                         </p>
                     </div>
                 </div>
-                <Button onClick={handleSave} className="gap-2" disabled={!post.title || saving}>
+                <Button
+                    onClick={handleSave}
+                    className="gap-2 w-full sm:w-auto min-h-[48px]"
+                    disabled={!post.title || saving}
+                >
                     {saving ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                     ) : saved ? (
@@ -159,10 +162,92 @@ export default function EditBlogPostClient() {
                 </Button>
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-6">
+            {/* Cover Image - Show first on mobile */}
+            <div className="lg:hidden bg-white dark:bg-secondary-800 rounded-xl p-4 shadow-sm border border-secondary-200 dark:border-secondary-700">
+                <h3 className="font-semibold text-secondary-900 dark:text-white mb-4">Cover Image</h3>
+
+                <div className="space-y-4">
+                    {post.imageUrl ? (
+                        <div className="relative aspect-video rounded-lg overflow-hidden border border-secondary-200 dark:border-secondary-600 group">
+                            <Image
+                                src={post.imageUrl}
+                                alt="Cover preview"
+                                fill
+                                className="object-cover"
+                            />
+                            <button
+                                onClick={() => setPost({ ...post, imageUrl: undefined })}
+                                className="absolute top-2 right-2 p-2 bg-white/90 text-red-500 rounded-full shadow-sm min-w-[40px] min-h-[40px] flex items-center justify-center"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                    ) : (
+                        <div
+                            onClick={() => fileInputRef.current?.click()}
+                            className="border-2 border-dashed border-secondary-300 dark:border-secondary-600 rounded-lg p-8 flex flex-col items-center justify-center text-secondary-500 hover:text-primary-600 hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-secondary-700/50 transition-all cursor-pointer min-h-[120px]"
+                        >
+                            <Upload className="w-8 h-8 mb-2" />
+                            <span className="text-sm font-medium">Upload Image</span>
+                            <span className="text-xs mt-1">Max 700KB</span>
+                        </div>
+                    )}
+
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        accept="image/*"
+                        className="hidden"
+                    />
+
+                    {error && (
+                        <div className="flex items-center gap-2 text-xs text-red-500 bg-red-50 dark:bg-red-900/10 p-2 rounded">
+                            <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                            {error}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Post Details - Show on mobile before content */}
+            <div className="lg:hidden bg-white dark:bg-secondary-800 rounded-xl p-4 shadow-sm border border-secondary-200 dark:border-secondary-700">
+                <h3 className="font-semibold text-secondary-900 dark:text-white mb-4">Post Details</h3>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                            Category
+                        </label>
+                        <select
+                            value={post.category}
+                            onChange={(e) => setPost({ ...post, category: e.target.value })}
+                            className="w-full px-4 py-3 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white min-h-[48px]"
+                        >
+                            {categories.map((cat) => (
+                                <option key={cat} value={cat}>
+                                    {cat}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
+                            Author
+                        </label>
+                        <input
+                            type="text"
+                            value={post.author}
+                            onChange={(e) => setPost({ ...post, author: e.target.value })}
+                            className="w-full px-4 py-3 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white min-h-[48px]"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid lg:grid-cols-3 gap-4 sm:gap-6">
                 {/* Main Content */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white dark:bg-secondary-800 rounded-xl p-6 shadow-sm border border-secondary-200 dark:border-secondary-700 space-y-4">
+                <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+                    <div className="bg-white dark:bg-secondary-800 rounded-xl p-4 sm:p-6 shadow-sm border border-secondary-200 dark:border-secondary-700 space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-2">
                                 Post Title *
@@ -171,7 +256,7 @@ export default function EditBlogPostClient() {
                                 type="text"
                                 value={post.title}
                                 onChange={(e) => setPost({ ...post, title: e.target.value })}
-                                className="w-full px-4 py-3 text-xl rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white"
+                                className="w-full px-4 py-3 text-base sm:text-xl rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white min-h-[48px]"
                                 placeholder="Enter a compelling title..."
                             />
                         </div>
@@ -184,7 +269,7 @@ export default function EditBlogPostClient() {
                                 value={post.excerpt}
                                 onChange={(e) => setPost({ ...post, excerpt: e.target.value })}
                                 rows={2}
-                                className="w-full px-4 py-2.5 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white resize-none"
+                                className="w-full px-4 py-3 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white resize-none"
                                 placeholder="A brief summary that appears in post previews..."
                             />
                         </div>
@@ -196,8 +281,8 @@ export default function EditBlogPostClient() {
                             <textarea
                                 value={post.content}
                                 onChange={(e) => setPost({ ...post, content: e.target.value })}
-                                rows={15}
-                                className="w-full px-4 py-2.5 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white resize-none font-mono text-sm"
+                                rows={12}
+                                className="w-full px-4 py-3 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white resize-none font-mono text-sm"
                                 placeholder="Write your blog post content here... (Markdown supported)"
                             />
                             <p className="text-xs text-secondary-500 mt-2">
@@ -207,8 +292,8 @@ export default function EditBlogPostClient() {
                     </div>
                 </div>
 
-                {/* Sidebar */}
-                <div className="space-y-6">
+                {/* Sidebar - Hidden on mobile (shown above) */}
+                <div className="hidden lg:block space-y-6">
                     {/* Cover Image */}
                     <div className="bg-white dark:bg-secondary-800 rounded-xl p-6 shadow-sm border border-secondary-200 dark:border-secondary-700">
                         <h3 className="font-semibold text-secondary-900 dark:text-white mb-4">Cover Image</h3>
@@ -239,14 +324,6 @@ export default function EditBlogPostClient() {
                                     <span className="text-xs mt-1">Max 700KB</span>
                                 </div>
                             )}
-
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleImageChange}
-                                accept="image/*"
-                                className="hidden"
-                            />
 
                             {error && (
                                 <div className="flex items-center gap-2 text-xs text-red-500 bg-red-50 dark:bg-red-900/10 p-2 rounded">

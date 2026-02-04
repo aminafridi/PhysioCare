@@ -10,7 +10,6 @@ import {
     Twitter,
     Instagram,
     Linkedin,
-    Clock
 } from 'lucide-react';
 import { getSettings, SettingsData } from '@/lib/firestore';
 
@@ -74,27 +73,27 @@ export function Footer() {
     return (
         <footer className="bg-secondary-900 text-secondary-300">
             {/* Main Footer */}
-            <div className="container-custom py-16">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-                    {/* Brand Column */}
-                    <div className="lg:col-span-1">
-                        <Link href="/" className="flex items-center space-x-2 mb-6">
-                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
-                                <span className="text-white font-bold text-xl">P</span>
+            <div className="container-custom py-10 sm:py-12 lg:py-16">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12">
+                    {/* Brand Column - Full width on mobile */}
+                    <div className="col-span-2 sm:col-span-2 lg:col-span-1">
+                        <Link href="/" className="flex items-center space-x-2 mb-4 sm:mb-6">
+                            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center">
+                                <span className="text-white font-bold text-lg sm:text-xl">P</span>
                             </div>
-                            <span className="text-xl font-bold text-white">
+                            <span className="text-lg sm:text-xl font-bold text-white">
                                 {settings.clinicName.split('Care')[0]}<span className="text-primary-400">Care</span>
                             </span>
                         </Link>
-                        <p className="text-sm leading-relaxed mb-6">
+                        <p className="text-sm leading-relaxed mb-4 sm:mb-6 max-w-xs">
                             {settings.tagline}. We&apos;re committed to helping you restore your movement and relieve your pain.
                         </p>
-                        <div className="flex space-x-4">
+                        <div className="flex space-x-3">
                             {socialLinks.map((social) => (
                                 <a
                                     key={social.label}
                                     href={social.href}
-                                    className="w-10 h-10 rounded-full bg-secondary-800 flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
+                                    className="w-10 h-10 sm:w-10 sm:h-10 rounded-full bg-secondary-800 flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
                                     aria-label={social.label}
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -107,13 +106,13 @@ export function Footer() {
 
                     {/* Services */}
                     <div>
-                        <h4 className="text-white font-semibold mb-6">Our Services</h4>
-                        <ul className="space-y-3">
+                        <h4 className="text-white font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Our Services</h4>
+                        <ul className="space-y-2 sm:space-y-3">
                             {serviceLinks.map((service) => (
                                 <li key={service.href}>
                                     <Link
                                         href={service.href}
-                                        className="text-sm hover:text-primary-400 transition-colors duration-200"
+                                        className="text-xs sm:text-sm hover:text-primary-400 transition-colors duration-200 inline-block py-1"
                                     >
                                         {service.label}
                                     </Link>
@@ -124,40 +123,46 @@ export function Footer() {
 
                     {/* Contact Info */}
                     <div>
-                        <h4 className="text-white font-semibold mb-6">Contact Us</h4>
-                        <ul className="space-y-4">
-                            <li className="flex items-start space-x-3">
-                                <MapPin className="w-5 h-5 text-primary-400 mt-0.5 flex-shrink-0" />
-                                <span className="text-sm">
+                        <h4 className="text-white font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Contact Us</h4>
+                        <ul className="space-y-3 sm:space-y-4">
+                            <li className="flex items-start space-x-2 sm:space-x-3">
+                                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary-400 mt-0.5 flex-shrink-0" />
+                                <span className="text-xs sm:text-sm">
                                     {settings.address}
                                 </span>
                             </li>
-                            <li className="flex items-center space-x-3">
-                                <Phone className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                                <a href={`tel:${settings.phone.replace(/[^0-9]/g, '')}`} className="text-sm hover:text-primary-400 transition-colors">
-                                    {settings.phone}
+                            <li>
+                                <a
+                                    href={`tel:${settings.phone.replace(/[^0-9]/g, '')}`}
+                                    className="flex items-center space-x-2 sm:space-x-3 text-xs sm:text-sm hover:text-primary-400 transition-colors py-1"
+                                >
+                                    <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-primary-400 flex-shrink-0" />
+                                    <span>{settings.phone}</span>
                                 </a>
                             </li>
-                            <li className="flex items-center space-x-3">
-                                <Mail className="w-5 h-5 text-primary-400 flex-shrink-0" />
-                                <a href={`mailto:${settings.email}`} className="text-sm hover:text-primary-400 transition-colors">
-                                    {settings.email}
+                            <li>
+                                <a
+                                    href={`mailto:${settings.email}`}
+                                    className="flex items-center space-x-2 sm:space-x-3 text-xs sm:text-sm hover:text-primary-400 transition-colors py-1"
+                                >
+                                    <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-primary-400 flex-shrink-0" />
+                                    <span className="break-all">{settings.email}</span>
                                 </a>
                             </li>
                         </ul>
                     </div>
 
-                    {/* Newsletter */}
-                    <div>
-                        <h4 className="text-white font-semibold mb-6">Newsletter</h4>
-                        <p className="text-sm mb-4">Subscribe to get the latest health updates and tips.</p>
-                        <form className="space-y-3">
+                    {/* Newsletter - Full width on mobile */}
+                    <div className="col-span-2 sm:col-span-2 lg:col-span-1">
+                        <h4 className="text-white font-semibold mb-4 sm:mb-6 text-sm sm:text-base">Newsletter</h4>
+                        <p className="text-xs sm:text-sm mb-3 sm:mb-4">Subscribe to get the latest health updates and tips.</p>
+                        <form className="flex flex-col sm:flex-row lg:flex-col gap-2 sm:gap-3">
                             <input
                                 type="email"
                                 placeholder="Enter your email"
-                                className="w-full px-4 py-2 rounded-lg bg-secondary-800 border border-secondary-700 text-white placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                                className="flex-1 px-4 py-3 rounded-lg bg-secondary-800 border border-secondary-700 text-white placeholder-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm min-h-[48px]"
                             />
-                            <button className="w-full px-4 py-2 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors">
+                            <button className="px-6 py-3 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors text-sm min-h-[48px] whitespace-nowrap">
                                 Subscribe
                             </button>
                         </form>
@@ -167,16 +172,16 @@ export function Footer() {
 
             {/* Bottom Bar */}
             <div className="border-t border-secondary-800">
-                <div className="container-custom py-6">
-                    <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                        <p className="text-sm text-secondary-400">
+                <div className="container-custom py-4 sm:py-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
+                        <p className="text-xs sm:text-sm text-secondary-400 text-center sm:text-left">
                             © {currentYear} {settings.clinicName}. All rights reserved.
                         </p>
-                        <div className="flex space-x-6">
-                            <Link href="#" className="text-sm text-secondary-400 hover:text-primary-400 transition-colors">
+                        <div className="flex gap-4 sm:gap-6">
+                            <Link href="#" className="text-xs sm:text-sm text-secondary-400 hover:text-primary-400 transition-colors py-1">
                                 Privacy Policy
                             </Link>
-                            <Link href="#" className="text-sm text-secondary-400 hover:text-primary-400 transition-colors">
+                            <Link href="#" className="text-xs sm:text-sm text-secondary-400 hover:text-primary-400 transition-colors py-1">
                                 Terms of Service
                             </Link>
                         </div>

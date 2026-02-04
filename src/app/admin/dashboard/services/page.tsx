@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Button, Modal } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { Plus, Edit, Trash2, GripVertical, Loader2 } from 'lucide-react';
 import { getServices, deleteService, updateService, ServiceData } from '@/lib/firestore';
 import { services as defaultServices } from '@/data/services';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 
 export default function ServicesManagementPage() {
     const [services, setServices] = useState<ServiceData[]>([]);
@@ -96,26 +97,31 @@ export default function ServicesManagementPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-secondary-900 dark:text-white">
+                    <h1 className="text-xl sm:text-2xl font-bold text-secondary-900 dark:text-white">
                         Manage Services
                     </h1>
-                    <p className="text-secondary-600 dark:text-secondary-400">
+                    <p className="text-sm sm:text-base text-secondary-600 dark:text-secondary-400">
                         Add, edit, or remove your physiotherapy services
                     </p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                     {services.length === 0 || services.some(s => defaultServices.some(d => d.id === s.id)) && (
-                        <Button onClick={handleImportDefaults} variant="outline" disabled={importing}>
+                        <Button
+                            onClick={handleImportDefaults}
+                            variant="outline"
+                            disabled={importing}
+                            className="min-h-[48px]"
+                        >
                             {importing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                             Import Defaults to DB
                         </Button>
                     )}
                     <Link href="/admin/dashboard/services/new">
-                        <Button className="gap-2">
+                        <Button className="gap-2 w-full min-h-[48px]">
                             <Plus className="w-4 h-4" />
                             Add Service
                         </Button>
@@ -123,19 +129,18 @@ export default function ServicesManagementPage() {
                 </div>
             </div>
 
-            {/* Services List */}
-            <div className="bg-white dark:bg-secondary-800 rounded-xl shadow-sm border border-secondary-200 dark:border-secondary-700 overflow-hidden">
+            {/* Services List - Desktop */}
+            <div className="hidden md:block bg-white dark:bg-secondary-800 rounded-xl shadow-sm border border-secondary-200 dark:border-secondary-700 overflow-hidden">
                 <div className="divide-y divide-secondary-200 dark:divide-secondary-700">
                     {services.map((service) => (
                         <div
                             key={service.id}
                             className="flex items-center gap-4 p-4 hover:bg-secondary-50 dark:hover:bg-secondary-700/50 transition-colors"
                         >
-                            <button className="text-secondary-400 cursor-grab hover:text-secondary-600">
+                            <button className="text-secondary-400 cursor-grab hover:text-secondary-600 p-1">
                                 <GripVertical className="w-5 h-5" />
                             </button>
                             <div className="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
-                                {/* Dynamic Icon attempt or fallback */}
                                 <span className="text-xl">💆</span>
                             </div>
                             <div className="flex-1 min-w-0">
@@ -148,14 +153,14 @@ export default function ServicesManagementPage() {
                             </div>
                             <div className="flex items-center gap-2">
                                 <Link href={`/admin/dashboard/services/${service.id}`}>
-                                    <button className="p-2 text-secondary-500 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors">
+                                    <button className="p-2.5 text-secondary-500 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center">
                                         <Edit className="w-5 h-5" />
                                     </button>
                                 </Link>
                                 <button
                                     onClick={() => service.id && handleDeleteClick(service.id)}
                                     disabled={deleting === service.id}
-                                    className="p-2 text-secondary-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50"
+                                    className="p-2.5 text-secondary-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center"
                                 >
                                     {deleting === service.id ? (
                                         <Loader2 className="w-5 h-5 animate-spin" />
@@ -169,46 +174,76 @@ export default function ServicesManagementPage() {
                 </div>
             </div>
 
+            {/* Services List - Mobile Card View */}
+            <div className="md:hidden space-y-3">
+                {services.map((service) => (
+                    <div
+                        key={service.id}
+                        className="bg-white dark:bg-secondary-800 rounded-xl p-4 shadow-sm border border-secondary-200 dark:border-secondary-700"
+                    >
+                        <div className="flex items-start gap-3 mb-3">
+                            <div className="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
+                                <span className="text-xl">💆</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-medium text-secondary-900 dark:text-white">
+                                    {service.title}
+                                </h3>
+                                <p className="text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">
+                                    {service.shortDescription}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-3 border-t border-secondary-100 dark:border-secondary-700">
+                            <Link href={`/admin/dashboard/services/${service.id}`} className="flex-1">
+                                <Button variant="outline" className="w-full min-h-[44px] gap-2">
+                                    <Edit className="w-4 h-4" />
+                                    Edit
+                                </Button>
+                            </Link>
+                            <button
+                                onClick={() => service.id && handleDeleteClick(service.id)}
+                                disabled={deleting === service.id}
+                                className="p-2.5 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 min-w-[44px] min-h-[44px] flex items-center justify-center border border-red-200 dark:border-red-800"
+                            >
+                                {deleting === service.id ? (
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                ) : (
+                                    <Trash2 className="w-5 h-5" />
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
             {services.length === 0 && (
                 <div className="text-center py-12">
                     <p className="text-secondary-600 dark:text-secondary-400 mb-4">
                         No services added yet
                     </p>
-                    <div className="flex justify-center gap-4">
-                        <Button onClick={handleImportDefaults} variant="outline" disabled={importing}>
+                    <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+                        <Button onClick={handleImportDefaults} variant="outline" disabled={importing} className="min-h-[48px]">
                             Import Defaults
                         </Button>
                         <Link href="/admin/dashboard/services/new">
-                            <Button>Add Your First Service</Button>
+                            <Button className="w-full min-h-[48px]">Add Your First Service</Button>
                         </Link>
                     </div>
                 </div>
             )}
 
-            <Modal
+            {/* Delete Confirmation Dialog */}
+            <ConfirmDialog
                 isOpen={deleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
+                onConfirm={confirmDelete}
                 title="Delete Service"
-            >
-                <div className="flex flex-col gap-4">
-                    <p className="text-secondary-600 dark:text-secondary-400">
-                        Are you sure you want to delete this service? This action cannot be undone.
-                    </p>
-                    <div className="flex justify-end gap-3 mt-4">
-                        <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            className="bg-red-600 hover:bg-red-700 text-white border-none"
-                            onClick={confirmDelete}
-                            disabled={!!deleting}
-                        >
-                            {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
-                            Delete Service
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
+                message="Are you sure you want to delete this service? This action cannot be undone."
+                confirmText="Delete Service"
+                isLoading={!!deleting}
+                variant="danger"
+            />
         </div>
     );
 }
